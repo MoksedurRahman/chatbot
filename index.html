@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Support Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; }
+        #chatbox { width: 300px; height: 400px; background-color: white; border-radius: 10px; padding: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); position: fixed; bottom: 20px; right: 20px; }
+        #messages { height: 350px; overflow-y: auto; }
+        #user-input { width: 100%; padding: 10px; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; }
+        .message { margin: 5px 0; padding: 10px; border-radius: 5px; }
+        .user-message { background-color: #e0f7fa; text-align: right; }
+        .bot-message { background-color: #f1f8e9; text-align: left; }
+        .send-button { background-color: #007BFF; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="chatbox">
+        <div id="messages"></div>
+        <input type="text" id="user-input" placeholder="Type your message..." />
+        <button class="send-button" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const apiUrl = "http://127.0.0.1:5000/get_response";  // Backend API URL
+
+        function appendMessage(message, sender) {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message");
+            messageElement.classList.add(sender === "user" ? "user-message" : "bot-message");
+            messageElement.textContent = message;
+            document.getElementById("messages").appendChild(messageElement);
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById("user-input").value;
+            if (userInput.trim() === "") return;
+
+            appendMessage(userInput, "user");
+
+            // Clear input field
+            document.getElementById("user-input").value = "";
+
+            // Send message to the Flask server
+            fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                appendMessage(data.response, "bot");
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        }
+    </script>
+</body>
+</html>
