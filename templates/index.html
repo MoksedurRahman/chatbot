@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Support Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; }
+        #chatbox { width: 400px; margin: 50px auto; padding: 20px; background: white; border-radius: 8px; }
+        .bot { color: green; }
+        .user { color: blue; }
+        #messages { height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div id="chatbox">
+        <h2>🤖 Customer Support Chatbot</h2>
+        <div id="messages"></div>
+        <input type="text" id="userInput" placeholder="Type a message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            let userText = document.getElementById("userInput").value;
+            if (userText === "") return;
+
+            let messages = document.getElementById("messages");
+            messages.innerHTML += "<p class='user'><b>You:</b> " + userText + "</p>";
+
+            fetch("/get", {
+                method: "POST",
+                body: new URLSearchParams({ "msg": userText }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(res => res.json())
+            .then(data => {
+                messages.innerHTML += "<p class='bot'><b>Bot:</b> " + data.response + "</p>";
+                messages.scrollTop = messages.scrollHeight;
+            });
+
+            document.getElementById("userInput").value = "";
+        }
+    </script>
+</body>
+</html>

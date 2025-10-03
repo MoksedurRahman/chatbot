@@ -1,21 +1,34 @@
-from flask import Flask, request, jsonify
-from chatterbot import ChatBot
-from chatterbot.trainers import ChatterBotCorpusTrainer
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# Create a chatbot instance
-chatbot = ChatBot('CustomerSupportBot')
+# Simple chatbot logic
+def chatbot_response(user_input):
+    user_input = user_input.lower()
 
-# Train the bot with English corpus
-trainer = ChatterBotCorpusTrainer(chatbot)
-trainer.train('chatterbot.corpus.english')
+    if "order" in user_input:
+        return "📦 You can track your order on our website under 'My Orders'. Do you need the link?"
 
-@app.route('/get_response', methods=['POST'])
-def get_response():
-    user_message = request.json.get('message')
-    bot_response = chatbot.get_response(user_message)
-    return jsonify({'response': str(bot_response)})
+    elif "refund" in user_input:
+        return "💳 Refunds are processed within 5–7 business days. Would you like me to guide you through the process?"
 
-if __name__ == '__main__':
+    elif "problem" in user_input or "issue" in user_input:
+        return "⚠️ I'm sorry to hear that! Could you please describe the problem in more detail?"
+
+    elif "contact" in user_input or "agent" in user_input:
+        return "☎️ You can reach our support team at support@example.com or call +44 1234 567890."
+
+    else:
+        return "🤖 I'm not sure about that. Let me connect you to a human agent for further help."
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route("/get", methods=["POST"])
+def get_bot_response():
+    user_text = request.form["msg"]
+    return jsonify({"response": chatbot_response(user_text)})
+
+if __name__ == "__main__":
     app.run(debug=True)
